@@ -273,9 +273,11 @@ async function downloadCSV(){
 
         Android.downloadCSV(csv);
 
-    catch(err){
-    Android.showToast("Terjadi kesalahan");
-}
+    }catch(err){
+
+        Android.showToast("Terjadi kesalahan");
+
+    }
 
 }
 
