@@ -89,7 +89,7 @@ th{
 <option>7H</option>
 <option>7I</option>
 </select>
-    
+
 <input type="date" id="tanggal">
 
 <button onclick="simpan()">
@@ -159,7 +159,7 @@ async function loadSiswa(){
 
     }catch(err){
 
-        Android.showToast("Gagal...");
+        Android.showToast("Terjadi kesalahan");
 
     }
 }
@@ -223,7 +223,7 @@ async function simpan(){
 
     }catch(err){
 
-        Android.showToast("Gagal...");
+        alert("Gagal menyimpan");
 
     }
 
@@ -247,7 +247,7 @@ async function downloadCSV(){
 
     if(!kelas){
 
-        Android.showToast("Gagal...");
+        Android.showToast("Terjadi kesalahan");
 
         return;
     }
@@ -273,12 +273,10 @@ async function downloadCSV(){
 
         Android.downloadCSV(csv);
 
-    }catch(err){
-
-        Android.showToast("Gagal...");
-        );
-
-    }
+    catch(err){
+    Android.showToast("Terjadi kesalahan");
+    console.log(err); // untuk debugging
+}
 
 }
 
