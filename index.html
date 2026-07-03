@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Input Nilai Siswa</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    padding:20px;
+    background:#f3f5f8;
+}
+
+.toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.toolbar select,
+.toolbar input{
+    height:48px;
+    font-size:20px;
+    padding:0 10px;
+}
+
+.toolbar button{
+    height:48px;
+    padding:0 15px;
+    font-size:16px;
+    white-space:nowrap;
+}
+
+button{
+    cursor:pointer;
+}
+
+table{
+    border-collapse:collapse;
+    width:auto;
+}
+
+th,
+td{
+    border:1px solid #ccc;
+    padding:6px 8px;
+    white-space:nowrap;
+    text-align:center;
+}
+
+th{
+    background:#0d6efd;
+    color:white;
+}
+
+.nama{
+    text-align:left;
+    padding-left:15px;
+    font-size:20px;
+}
+
+.nilai{
+    width:80px;
+    height:38px;
+    font-size:18px;
+    text-align:center;
+}
+
+</style>
+</head>
+<body>
+
+<h2>INPUT NILAI SISWA</h2>
+
+<div class="toolbar">
+
+<select id="kelas" onchange="loadSiswa()">
+<option>7A</option>
+<option>7B</option>
+<option>7C</option>
+<option>7D</option>
+<option>7E</option>
+<option>7F</option>
+<option>7G</option>
+<option>7H</option>
+<option>7I</option>
+</select>
+
+<input type="date" id="tanggal">
+
+<button onclick="simpan()">
+Simpan
+</button>
+
+<select id="kelasDownload">
+    <option value="">Pilih Kelas</option>
+    <option value="7A">7A</option>
+    <option value="7B">7B</option>
+    <option value="7C">7C</option>
+    <option value="7D">7D</option>
+    <option value="7E">7E</option>
+    <option value="7F">7F</option>
+    <option value="7G">7G</option>
+    <option value="7H">7H</option>
+    <option value="7I">7I</option>
+    <option value="SEMUA">SEMUA KELAS</option>
+</select>
+
+<button onclick="downloadCSV()">
+📥 Download
+</button>
+
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>No</th>
+<th>NIS</th>
+<th>Nama</th>
+<th>L/P</th>
+<th>Nilai</th>
+</tr>
+</thead>
+
+<tbody id="tbody"></tbody>
+
+</table>
+
+<script>
+
+const API = "https://script.google.com/macros/s/AKfycbwpYUB1mI0sTOH8sWF4huG9btwiDeZang43vWY-3AnWazBf_e9sUWCbPqtkwjBYqnWmHQ/exec";
+
+let dataSiswa = [];
+
+async function loadSiswa(){
+
+    try{
+
+        const kelas =
+        document.getElementById("kelas").value;
+
+        const res =
+        await fetch(API + "?kelas=" + kelas);
+
+        dataSiswa =
+        await res.json();
+
+        dataSiswa.forEach(s=>{
+            s.nilai = "";
+        });
+
+        render();
+
+    }catch(err){
+
+        alert("Gagal mengambil data siswa");
+
+    }
+}
+
+function render(){
+
+    let html = "";
+
+    dataSiswa.forEach((s,i)=>{
+
+        html += `
+        <tr>
+
+        <td>${s.no}</td>
+
+        <td>${s.nis}</td>
+
+        <td class="nama">${s.nama}</td>
+
+        <td>${s.jk}</td>
+
+        <td>
+            <input
+                type="number"
+                min="0"
+                max="100"
+                class="nilai"
+                value="${s.nilai}"
+                onchange="setNilai(${i},this.value)">
+        </td>
+
+        </tr>
+        `;
+    });
+
+    document.getElementById("tbody").innerHTML = html;
+}
+
+function setNilai(i,nilai){
+
+    dataSiswa[i].nilai = nilai;
+
+}
+
+async function simpan(){
+
+    try{
+
+        const data = {
+            kelas: document.getElementById("kelas").value,
+            tanggal: document.getElementById("tanggal").value,
+            nilai: dataSiswa
+        };
+
+        const res = await fetch(API,{
+            method:"POST",
+            body:JSON.stringify(data)
+        });
+
+        await res.text();
+
+    }catch(err){
+
+        alert("Gagal menyimpan");
+
+    }
+
+}
+
+window.onload = function(){
+
+    document.getElementById("tanggal").value =
+    new Date().toISOString().split("T")[0];
+
+    loadSiswa();
+}
+
+// ================= DOWNLOAD =================
+async function downloadCSV(){
+
+    let kelas =
+    document.getElementById(
+        "kelasDownload"
+    ).value;
+
+    if(!kelas){
+
+        alert(
+            "Pilih kelas terlebih dahulu"
+        );
+
+        return;
+    }
+
+    try{
+
+        let response =
+        await fetch(
+            API + "?rekap=" + kelas
+        );
+
+        let data =
+        await response.json();
+
+        let csv = "";
+
+        data.forEach(row=>{
+
+            csv +=
+            row.join(";") + "\n";
+
+        });
+
+        Android.downloadCSV(csv);
+
+    }catch(err){
+
+        alert(
+            "Gagal mengunduh rekap"
+        );
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
